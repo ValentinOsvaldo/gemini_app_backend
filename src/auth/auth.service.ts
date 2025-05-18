@@ -16,8 +16,8 @@ import { JwtPayload } from './interfaces/jwt-payload.interface';
 export class AuthService {
   constructor(
     @InjectRepository(User)
-    private usersRepository: Repository<User>,
-    private jwtService: JwtService,
+    private readonly usersRepository: Repository<User>,
+    private readonly jwtService: JwtService,
   ) {}
 
   async signUp(signUpDto: SignUpDto) {
@@ -28,6 +28,8 @@ export class AuthService {
       user.password = bcrypt.hashSync(user.password, saltOrRounds);
 
       await this.usersRepository.save(user);
+
+      delete user.password;
 
       return user;
     } catch (error) {

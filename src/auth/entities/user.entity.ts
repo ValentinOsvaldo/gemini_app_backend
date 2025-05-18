@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Chat } from 'src/chat/entities/chat.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class User {
@@ -17,4 +18,7 @@ export class User {
     select: false,
   })
   password: string;
+
+  @OneToMany(() => Chat, (chat) => chat.id)
+  chats: Chat[];
 }
