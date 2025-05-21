@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { Auth, GetUser } from 'src/auth/decorators';
 import { GeminiDto } from './dto/gemini.dto';
@@ -18,6 +18,12 @@ export class ChatController {
   @Get()
   getChats(@GetUser() user: User) {
     return this.chatService.getChats(user);
+  }
+
+  @Auth()
+  @Delete(':id')
+  deleteChatById(@Param('id') id: string) {
+    return this.chatService.deleteChat(id);
   }
 
   @Auth()

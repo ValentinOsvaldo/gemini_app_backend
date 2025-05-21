@@ -1,4 +1,10 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Chat } from './chat.entity';
 
 export enum MessageType {
@@ -19,6 +25,9 @@ export class Message {
     enum: MessageType,
   })
   type: MessageType;
+
+  @CreateDateColumn()
+  createdAt: Date;
 
   @ManyToOne(() => Chat, (chat) => chat.messages)
   chat: Chat;

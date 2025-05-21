@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { GeminiService } from 'src/gemini/gemini.service';
 import { Repository } from 'typeorm';
@@ -97,11 +101,29 @@ export class ChatService {
     const messages = await this.messageRepository.find({
       where: { chat: { id: chatId } },
       order: {
-        id: 'ASC',
+        createdAt: 'ASC',
       },
     });
 
     return messages;
+  }
+
+  async deleteChat(id: string) {
+    try {
+      const chat = await this.chatRepository.findOne({
+        where: { id },
+      });
+
+      if (!chat) throw new NotFoundException("This chat doesn't exists");
+
+      await this.chatRepository.delete(id);
+
+      return {
+        message: 'Chat deleted successfully',
+      };
+    } catch (error) {
+      throw new InternalServerErrorException('Error deleting chat');
+    }
   }
 
   private async _saveMessage(args: GenerateMessageArgs) {
