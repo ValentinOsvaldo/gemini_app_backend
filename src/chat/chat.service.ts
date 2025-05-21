@@ -90,7 +90,7 @@ export class ChatService {
       take: limit,
       skip: offset,
       order: {
-        id: 'DESC',
+        createdAt: 'ASC',
       },
     });
 

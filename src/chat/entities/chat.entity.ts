@@ -1,5 +1,6 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   ManyToOne,
   OneToMany,
@@ -15,6 +16,9 @@ export class Chat {
 
   @Column('text')
   title: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
 
   @ManyToOne(() => User, (user) => user.chats)
   user: User;
