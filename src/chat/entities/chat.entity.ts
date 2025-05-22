@@ -23,6 +23,6 @@ export class Chat {
   @ManyToOne(() => User, (user) => user.chats)
   user: User;
 
-  @OneToMany(() => Message, (message) => message.id)
+  @OneToMany(() => Message, (message) => message.chat, { onDelete: 'CASCADE' })
   messages: Message[];
 }

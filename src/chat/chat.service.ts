@@ -90,7 +90,7 @@ export class ChatService {
       take: limit,
       skip: offset,
       order: {
-        createdAt: 'ASC',
+        createdAt: 'DESC',
       },
     });
 
@@ -122,6 +122,7 @@ export class ChatService {
         message: 'Chat deleted successfully',
       };
     } catch (error) {
+      console.error(error)
       throw new InternalServerErrorException('Error deleting chat');
     }
   }
