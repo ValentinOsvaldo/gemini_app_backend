@@ -1,6 +1,11 @@
 {
   "cSpell.words": [
     "gemini",
-    "genai"
+    "genai",
+    "PGDATABASE",
+    "PGHOST",
+    "PGPASSWORD",
+    "PGPORT",
+    "PGUSER"
   ]
 }
