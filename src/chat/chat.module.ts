@@ -6,10 +6,11 @@ import { GeminiModule } from 'src/gemini/gemini.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Chat } from './entities/chat.entity';
 import { Message } from './entities/message.entity';
+import { ChatGateway } from './chat.gateway';
 
 @Module({
   controllers: [ChatController],
-  providers: [ChatService],
+  providers: [ChatService, ChatGateway],
   imports: [
     AuthModule,
     GeminiModule,
