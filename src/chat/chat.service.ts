@@ -22,10 +22,30 @@ interface GenerateMessageArgs {
 export class ChatService {
   constructor(
     private readonly geminiService: GeminiService,
-    @InjectRepository(Chat) private readonly chatRepository: Repository<Chat>,
+    @InjectRepository(Chat)
+    private readonly chatRepository: Repository<Chat>,
     @InjectRepository(Message)
     private readonly messageRepository: Repository<Message>,
   ) {}
+
+  async getOrCreateChat(userId: string): Promise<Chat> {
+    let chat = await this.chatRepository.findOne({
+      where: { user: { id: userId } },
+    });
+    if (!chat) {
+      const user = await this.chatRepository.findOneOrFail({
+        where: { id: userId },
+      });
+      chat = this.chatRepository.create({ user });
+      await this.chatRepository.save(chat);
+    }
+    return chat;
+  }
+
+  async addMessage(chat: Chat, content: string, type: MessageType) {
+    const message = this.messageRepository.create({ chat, content, type });
+    return this.messageRepository.save(message);
+  }
 
   async generateGeminiResponse(prompt: string, user: User) {
     try {
@@ -122,7 +142,7 @@ export class ChatService {
         message: 'Chat deleted successfully',
       };
     } catch (error) {
-      console.error(error)
+      console.error(error);
       throw new InternalServerErrorException('Error deleting chat');
     }
   }

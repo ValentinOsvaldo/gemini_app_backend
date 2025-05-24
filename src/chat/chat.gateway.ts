@@ -1,5 +1,6 @@
-import { UseGuards } from '@nestjs/common';
 import {
+  ConnectedSocket,
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   SubscribeMessage,
@@ -9,6 +10,9 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtAuthSocket } from '../auth/auth-ws.middleware';
 import { User } from 'src/auth/entities/user.entity';
+import { ChatService } from './chat.service';
+import { GeminiService } from 'src/gemini/gemini.service';
+import { MessageType } from './entities/message.entity';
 
 @WebSocketGateway({
   namespace: 'chat',
@@ -19,7 +23,11 @@ import { User } from 'src/auth/entities/user.entity';
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
 
-  constructor(private readonly jwtAuthSocket: JwtAuthSocket) {}
+  constructor(
+    private readonly chatService: ChatService,
+    private readonly geminiService: GeminiService,
+    private readonly jwtAuthSocket: JwtAuthSocket,
+  ) {}
 
   async handleConnection(client: Socket) {
     try {
@@ -31,12 +39,32 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  handleDisconnect(client: any) {
-    console.log(`Client disconnected`);
+  handleDisconnect(client: Socket) {
+    console.log(`Client disconnected ${client.id}`);
   }
 
   @SubscribeMessage('message')
-  handleMessage(client: Socket, payload: any): string {
-    return 'Hello world!';
+  async handleMessage(
+    @MessageBody() payload: { message: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const { message } = payload;
+
+    const chat = await this.chatService.getOrCreateChat(
+      (client as any).user.id,
+    );
+    
+    await this.chatService.addMessage(chat, message, MessageType.USER);
+
+    const stream = await this.geminiService.getGeminiStream(message);
+
+    let fullResponse = '';
+
+    for await (const { text } of stream) {
+      fullResponse += text;
+      client.emit('response-token', text);
+    }
+
+    await this.chatService.addMessage(chat, fullResponse, MessageType.AI);
   }
 }
